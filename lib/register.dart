@@ -5,10 +5,36 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 class RegisterView extends StatelessWidget {
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final TextEditingController passController = new TextEditingController();
-  final TextEditingController emailController = new TextEditingController();
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
 
   Widget build(BuildContext context){
+    final firstname = FormBuilderTextField(
+      attribute: "firstname",
+      maxLines: 1,
+      decoration: InputDecoration(labelText: "Firstname"),
+      validators: [
+        FormBuilderValidators.required(errorText: "Firstname Required"),
+        FormBuilderValidators.min(2),
+      ],
+    );
+    final middlename = FormBuilderTextField(
+      attribute: "middlename",
+      maxLines: 1,
+      decoration: InputDecoration(labelText: "Middlename"),
+      validators: [
+        FormBuilderValidators.required(errorText: "Middlename Required"),
+        FormBuilderValidators.min(2),
+      ],
+    );
+    final lastname = FormBuilderTextField(
+      attribute: "lastname",
+      maxLines: 1,
+      decoration: InputDecoration(labelText: "Lastname"),
+      validators: [
+        FormBuilderValidators.required(errorText: "Lastname Required"),
+        FormBuilderValidators.min(2),
+      ],
+    );
     final emailField = FormBuilderTextField(
       attribute: "email",
       maxLines: 1,
@@ -107,6 +133,9 @@ class RegisterView extends StatelessWidget {
                         autovalidate: false,
                         child: Column(
                           children: <Widget>[
+                              firstname,
+                              middlename,
+                              lastname,
                               emailField,
                               passwordField,
                               confirmPassField,

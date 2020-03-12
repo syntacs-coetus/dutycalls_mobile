@@ -5,47 +5,12 @@ import 'requests.dart';
 
 class RegCredentsView extends StatelessWidget{
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-  final TextEditingController fNameController = new TextEditingController();
-  final TextEditingController mNameController = new TextEditingController();
-  final TextEditingController lNameController = new TextEditingController();
-  final TextEditingController bDateController = new TextEditingController();
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
   final Map user;
   RegCredentsView({this.user});
 
   Widget build(BuildContext context){
-    final firstname = FormBuilderTextField(
-      controller: fNameController,
-      attribute: "firstname",
-      maxLines: 1,
-      decoration: InputDecoration(labelText: "Firstname"),
-      validators: [
-        FormBuilderValidators.required(errorText: "Firstname Required"),
-        FormBuilderValidators.min(2),
-      ],
-    );
-    final middlename = FormBuilderTextField(
-      controller: mNameController,
-      attribute: "middlename",
-      maxLines: 1,
-      decoration: InputDecoration(labelText: "Middlename"),
-      validators: [
-        FormBuilderValidators.required(errorText: "Middlename Required"),
-        FormBuilderValidators.min(2),
-      ],
-    );
-    final lastname = FormBuilderTextField(
-      controller: lNameController,
-      attribute: "lastname",
-      maxLines: 1,
-      decoration: InputDecoration(labelText: "Lastname"),
-      validators: [
-        FormBuilderValidators.required(errorText: "Lastname Required"),
-        FormBuilderValidators.min(2),
-      ],
-    );
     final birthDate = FormBuilderDateTimePicker(
-      controller: bDateController,
       attribute: "bdate",
       maxLines: 1,
       inputType: InputType.date,
@@ -152,9 +117,6 @@ class RegCredentsView extends StatelessWidget{
                               autovalidate: false,
                               child: Column(
                                   children: <Widget>[
-                                    firstname,
-                                    middlename,
-                                    lastname,
                                     birthDate,
                                     civilStatus,
                                     gender,

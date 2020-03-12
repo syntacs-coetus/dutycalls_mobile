@@ -12,7 +12,7 @@ class JobList extends StatelessWidget {
       onTap: () => (
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context)  =>  new ProvList()),
+            MaterialPageRoute(builder: (context)  =>  new ProvList(jobID: data.id)),
           )
       ),
       child:Card(

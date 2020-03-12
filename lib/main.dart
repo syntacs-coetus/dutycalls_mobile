@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'login.dart';
 import 'dashboard.dart';
 import 'requests.dart';
+import 'user_profile.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginView(),
+      home: LoginView()
     );
   }
 }
@@ -34,7 +35,8 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
 
   final int id;
-  MyHomePage({this.id});
+  final int type;
+  MyHomePage({this.id, this.type});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -46,7 +48,7 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(id: this.id);
+  _MyHomePageState createState() => _MyHomePageState(id: this.id, type: this.type);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -56,15 +58,18 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime currentBackPressTime;
   int beforeExit = 0;
   final int id;
+  final int type;
 
-  _MyHomePageState({this.id});
+  _MyHomePageState({this.id, this.type});
 
   Future<UserDetails> userDetails;
   Future<List<JobCategory>> categories;
 
   void initState(){
     super.initState();
-    userDetails = Query().fetchUser(id.toString());
+    if(id != null){
+      userDetails = Query().fetchUser(id);
+    }
     categories = Query().fetchJobCategory();
   }
 
@@ -120,90 +125,106 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _changeScreen(BuildContext content, int index, int type) {
-    switch (index) {
-      case 0:
+    if(type == 2){
+      switch (index) {
+        case 0:
+          {
+            return Dashboard(jobCategory: categories);
+          }
+        case 1:
+          {
+            return Scaffold(
+                appBar: AppBar(
+                  title: Text("Category List"),
+                ),
+                body: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: 10,
+                itemBuilder: (context, i){
+                  if (i.isOdd) return Divider();
+
+                  final index = i ~/ 2;
+
+                  if(index >= _suggestions.length){
+                    _suggestions.addAll(generateWordPairs().take(10));
+                  }
+                  if(index >= _secondSuggestion.length){
+                    _secondSuggestion.addAll(generateWordPairs().take(10));
+                  }
+                  return _buildRow(index, _suggestions[index], _secondSuggestion[index]);
+                }
+              )
+            );
+          }
+        case 2:
+          {
+            return Scaffold(
+                appBar: AppBar(
+                  title: Text("Category List"),
+                ),
+                body: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemBuilder: (context, i){
+                  if (i.isOdd) return Divider();
+
+                  final index = i ~/ 2;
+
+                  if(index >= _suggestions.length){
+                    _suggestions.addAll(generateWordPairs().take(10));
+                  }
+                  if(index >= _secondSuggestion.length){
+                    _secondSuggestion.addAll(generateWordPairs().take(10));
+                  }
+                  return _buildRow(index, _suggestions[index], _secondSuggestion[index]);
+                }
+              )
+            );
+          }
+        case 3:
         {
-          return Dashboard(jobCategory: categories);
+            return UserProfilePage(user: userDetails);
         }
-      case 1:
+      }
+    }else if(type == 1){
+      switch (index) {
+        case 0:
+          {
+            return Dashboard(jobCategory: categories);
+          }
+        case 1:
+          {
+            return Scaffold(
+                appBar: AppBar(
+                  title: Text("Category List"),
+                ),
+                body: ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: 10,
+                itemBuilder: (context, i){
+                  if (i.isOdd) return Divider();
+
+                  final index = i ~/ 2;
+
+                  if(index >= _suggestions.length){
+                    _suggestions.addAll(generateWordPairs().take(10));
+                  }
+                  if(index >= _secondSuggestion.length){
+                    _secondSuggestion.addAll(generateWordPairs().take(10));
+                  }
+                  return _buildRow(index, _suggestions[index], _secondSuggestion[index]);
+                }
+              )
+            );
+          }
+        case 2:
         {
-          return Scaffold(
-              appBar: AppBar(
-                title: Text("Category List"),
-              ),
-              body: ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: 10,
-              itemBuilder: (context, i){
-                if (i.isOdd) return Divider();
-
-                final index = i ~/ 2;
-
-                if(index >= _suggestions.length){
-                  _suggestions.addAll(generateWordPairs().take(10));
-                }
-                if(index >= _secondSuggestion.length){
-                  _secondSuggestion.addAll(generateWordPairs().take(10));
-                }
-                return _buildRow(index, _suggestions[index], _secondSuggestion[index]);
-              }
-            )
-          );
+            return UserProfilePage(user: userDetails);
         }
-      case 2:
-        {
-          return Scaffold(
-              appBar: AppBar(
-                title: Text("Category List"),
-              ),
-              body: ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemBuilder: (context, i){
-                if (i.isOdd) return Divider();
-
-                final index = i ~/ 2;
-
-                if(index >= _suggestions.length){
-                  _suggestions.addAll(generateWordPairs().take(10));
-                }
-                if(index >= _secondSuggestion.length){
-                  _secondSuggestion.addAll(generateWordPairs().take(10));
-                }
-                return _buildRow(index, _suggestions[index], _secondSuggestion[index]);
-              }
-            )
-          );
-        }
-      case 3:
-        {
-          
-    return Scaffold(
-            appBar: AppBar(
-              title: Text("User Profile"),
-            ),
-            body: FutureBuilder<UserDetails>(
-            future: userDetails,
-            builder: (context, snapshot) {
-              print(snapshot.data);
-              if (snapshot.hasData) {
-                return Column(
-                  children: [
-                    Text('Name: ${snapshot.data.firstname} ${snapshot.data.lastname}'),
-                    Text('Type: Service Provider'),
-                    // Text('Birthdate: ${data[0].birthdate}'),
-                    Text('Civil Status: Married')
-                  ]
-                );
-              }
-              return Center(child: CircularProgressIndicator());
-            }
-          )
-        );
       }
     }
   }
 
-  userNavigation(type){
+  userNavigation(int type){
     switch(type){
       case 1:{
         return const <BottomNavigationBarItem>[
@@ -212,11 +233,11 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text('Dashboard'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            title: Text('Job Request'),
+            icon: Icon(Icons.table_chart),
+            title: Text('Your Request'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.person_pin),
             title: Text('User Profile'),
           ),
         ];
@@ -228,15 +249,15 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text('Dashboard'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.table_chart),
+            title: Text('Your Request'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.view_list),
             title: Text('Job Request'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            title: Text('Pending Request'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
+            icon: Icon(Icons.person_pin),
             title: Text('User Profile'),
           ),
         ];
@@ -273,9 +294,10 @@ class _MyHomePageState extends State<MyHomePage> {
         WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
-            body: _changeScreen(context, _selectedIndex, 2),
+            body: _changeScreen(context, _selectedIndex, type),
             bottomNavigationBar: BottomNavigationBar(
-              items: userNavigation(2),
+              items: userNavigation(type),
+              type: BottomNavigationBarType.fixed,
               currentIndex: _selectedIndex,
               selectedItemColor: Colors.blue[800],
               onTap: _onItemTapped,
