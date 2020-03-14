@@ -104,12 +104,6 @@ class RegisterView extends StatelessWidget {
     );
     return Stack(
         children: <Widget>[
-        Image.asset(
-          "assets/app/app.gif",
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          fit: BoxFit.cover,
-        ),
           WillPopScope(
             onWillPop: () async => false,
             child: Scaffold(
