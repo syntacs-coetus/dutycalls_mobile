@@ -3,7 +3,16 @@ import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'requests.dart';
 
-class RegCredentsView extends StatelessWidget{
+class RegCredentsView extends StatefulWidget{
+  final Map user;
+  RegCredentsView({this.user});
+
+  _RegCredentsView createState() => _RegCredentsView(user: this.user);
+}
+
+class _RegCredentsView extends State<RegCredentsView>{
+  final Map user;
+  _RegCredentsView({this.user});
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
   final Map user;
