@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:image_picker/image_picker.dart';
+
 import 'requests.dart';
 
 class RegCredentsView extends StatefulWidget{
@@ -15,8 +18,29 @@ class _RegCredentsView extends State<RegCredentsView>{
   _RegCredentsView({this.user});
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
-  final Map user;
-  RegCredentsView({this.user});
+  File avatar;
+  File validfront;
+  File validback;
+  getAvatar() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    setState(() {
+      this.avatar = image;
+    });
+  }
+
+  getValidFront() async{
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      this.validfront = image;
+    });
+  }
+
+  getValidBack() async{
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    setState(() {
+      this.validback = image;
+    });
+  }
 
   Widget build(BuildContext context){
     final birthDate = FormBuilderDateTimePicker(
@@ -48,7 +72,10 @@ class _RegCredentsView extends State<RegCredentsView>{
               'profile_lname': user['lastname'].toString(),
               'profile_gender': user['gender'].toString(),
               'profile_civil_status': user['civStats'].toString(),
-              'profile_bdate': user['bdate'].toString()
+              'profile_bdate': user['bdate'].toString(),
+              'profile_avatr': this.avatar,
+              'user_valid_id_front': this.validfront,
+              'user_valid_id_back': this.validback
             };
             Query().registerUser(context, list);
           }
@@ -92,14 +119,43 @@ class _RegCredentsView extends State<RegCredentsView>{
       )).toList()
     );
 
+    final valididfront = GestureDetector(
+              onTap: () => getValidFront(),
+              child:SizedBox(
+                height: 155.0,
+                width: 250.0,
+                child: Image.asset(
+                  "assets/app/front.jpg",
+                  fit: BoxFit.contain,
+                ),
+              )
+            );
+    final valididback = GestureDetector(
+              onTap: () => getValidBack(),
+              child:SizedBox(
+                height: 155.0,
+                width: 250.0,
+                child: Image.asset(
+                  "assets/app/back.jpg",
+                  fit: BoxFit.contain,
+                ),
+              )
+            );
+
+    final avatar = GestureDetector(
+              onTap: () => this.avatar = getAvatar(),
+              child:SizedBox(
+                height: 155.0,
+                width: 250.0,
+                child: Image.asset(
+                  "assets/users/default-profile.jpg",
+                  fit: BoxFit.contain,
+                ),
+              )
+            );
+
     return Stack(
         children: <Widget>[
-          Image.asset(
-            "assets/app/app.gif",
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            fit: BoxFit.cover,
-          ),
           WillPopScope(
               onWillPop: () async => false,
               child: Scaffold(
@@ -129,6 +185,9 @@ class _RegCredentsView extends State<RegCredentsView>{
                                     birthDate,
                                     civilStatus,
                                     gender,
+                                    avatar,
+                                    valididfront,
+                                    valididback,
                                     terms
                                   ]
                               )
