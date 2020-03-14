@@ -175,34 +175,160 @@ class UserProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _switchButton() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: InkWell(
-              onTap: () => print("followed"),
-              child: Container(
-                height: 40.0,
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                ),
-                child: Center(
-                  child: Text(
-                    "Become a Service Provider",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+  Widget _switchButton(BuildContext context, int userID, int type, bool hired, bool working) {
+    switch(type){
+      case 1:{
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: InkWell(
+                  onTap: () => 
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              actions: <Widget>[
+                                new FlatButton(
+                                  onPressed: () => {}, 
+                                  child: new Text("Continue"),
+                                ),
+                              ],
+                            );
+                          }
+                        )
+                  ,
+                  child: Container(
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Become a Service Provider",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
+      }
+      case 2:{
+        if(working != true){
+          if(hired == true){
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => 
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(
+                              content: SingleChildScrollView(
+                                child: new Text("Incorrect Login Credentials, try again."),
+                              ),
+                              actions: <Widget>[
+                                new FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  }, 
+                                  child: new Text("Continue"),
+                                ),
+                              ],
+                            );
+                          }
+                        ),
+                      child: Container(
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Resign",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }else{
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => Geolocation().providerForHire(context, userID),
+                      child: Container(
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                        ),
+                        child: Center(
+                          child: Text(
+                            "For Hire",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        }else{
+          return Padding(
+              padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: InkWell(
+                      onTap: () => {},
+                      child: Container(
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Working...",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+        }
+      }
+    }
+    return null;
   }
 
   Widget _logoutButton(BuildContext context) {
@@ -260,7 +386,7 @@ class UserProfilePage extends StatelessWidget {
                         SizedBox(height: 10.0),
                         _buildGetInTouch(context, snapshot.data.email, snapshot.data.firstname),
                         SizedBox(height: 6.0),
-                        (snapshot.data.type == 1) ? _switchButton() : Row(),
+                        _switchButton(context, snapshot.data.id, snapshot.data.type, false, false),
                         _logoutButton(context)
                       ],
                     ),
