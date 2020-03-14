@@ -18,6 +18,7 @@ class LoginView extends StatelessWidget {
   Widget build(BuildContext context){
     final emailField = FormBuilderTextField(
       attribute: "email",
+      maxLines: 1,
       decoration: InputDecoration(labelText: "Email"),
       validators: [
         FormBuilderValidators.required(errorText: "Email Required"),
