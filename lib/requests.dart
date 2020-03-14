@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:duty_calls/user_profile.dart';
+
 import 'login.dart';
 
 import 'main.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
-final baseURL = 'http://192.168.43.139:8000/api';
+final baseURL = 'http://192.168.1.14:8000/api';
 
 
 class ListedJobs{
@@ -95,6 +98,21 @@ class Providers {
       middlename: json['profile_mname'],
       lastname: json['profile_lname']
     );
+  }
+}
+
+class Geolocation{
+  providerForHire(BuildContext context, int userID) async{
+    Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    final response = await http.post('$baseURL/users/forhire', body: {'user_id': userID, 'latitude': position.latitude, 'longitude': position.longitude}, headers: {"Accept": "application/json"});
+    if(response.statusCode == 200){
+      final Future<UserDetails> user = Query().fetchUser(userID);
+      Navigator.pushReplacement(context, 
+        new MaterialPageRoute(
+          builder: (BuildContext context) => new UserProfilePage(user: user)
+        )
+      );
+    }
   }
 }
 
