@@ -4,15 +4,16 @@ import 'requests.dart';
 
 class JobList extends StatelessWidget {
   final int catID;
+  final int userID;
 
-  JobList({this.catID});
+  JobList({this.catID, this.userID});
 
   createGrid(BuildContext context, int index, data){
     return new GestureDetector(
       onTap: () => (
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context)  =>  new ProvList(jobID: data.id)),
+            MaterialPageRoute(builder: (context)  =>  new ProvList(jobID: data.id, userID: userID)),
           )
       ),
       child:Card(
@@ -54,8 +55,9 @@ class JobList extends StatelessWidget {
             );
           } else if (snapshot.hasError) {
             return Center(child: Text("Job Category empty. Contact an Administrator."));
+          }else{
+            return Center(child: CircularProgressIndicator());
           }
-          return Center(child: CircularProgressIndicator());
         }
       )
     );

@@ -45,7 +45,14 @@ class LoginView extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () {
           if(formKey.currentState.saveAndValidate()){
-            Query().loginUser(context, formKey.currentState.value);
+            // Navigator.pushReplacement(
+            //   context,
+            //   MaterialPageRoute(builder: (context)  =>  MyHomePage(id: 13, type: 2)),
+            // );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context)  =>  Query().loginUser(context, formKey.currentState.value)),
+            );
           }
         },
         child: Text("Login",
@@ -83,7 +90,7 @@ class LoginView extends StatelessWidget {
         onPressed: () {},
         child: RichText(
           text: TextSpan(
-            style: Theme.of(context).textTheme.body2,
+            style: Theme.of(context).textTheme.bodyText1,
             children: [
               WidgetSpan(
                 child: Padding(

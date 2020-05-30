@@ -5,15 +5,15 @@ import 'requests.dart';
 class Dashboard extends StatelessWidget {
 
   final Future<List<JobCategory>> jobCategory;
-
-  Dashboard({this.jobCategory});
+  final int userID;
+  Dashboard({this.jobCategory, this.userID});
 
   createGrid(BuildContext context, int index, data){
     return new GestureDetector(
         onTap: () => (
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context)  =>  JobList(catID: data.id)),
+              MaterialPageRoute(builder: (context)  =>  JobList(catID: data.id, userID: userID)),
             )
         ),
         child: Container(
@@ -24,7 +24,8 @@ class Dashboard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ListTile(
-                  title: new Center(child: Text("${data.catTitle}", style: TextStyle(color: Colors.white))),
+                  title: Text("${data.catTitle}", style: TextStyle(color: Colors.white)),
+                  subtitle: Text("${data.catDesc}", style: TextStyle(color: Colors.white, fontSize: 7.5)),
                 ),
               ],
             ),
@@ -49,9 +50,8 @@ class Dashboard extends StatelessWidget {
                 itemCount: data.length,
                 gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: MediaQuery.of(context).size.width/(MediaQuery.of(context).size.height / 5)
+                   childAspectRatio: MediaQuery.of(context).size.width / (MediaQuery.of(context).size.height / 4)
                 ),
-                padding: const EdgeInsets.all(1.0),
                 itemBuilder: (context, i){
 
                   final index = i ~/ 2;

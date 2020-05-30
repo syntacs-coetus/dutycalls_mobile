@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -18,25 +17,26 @@ class _RegCredentsView extends State<RegCredentsView>{
   _RegCredentsView({this.user});
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
-  File avatar;
-  File validfront;
-  File validback;
+  PickedFile avatar;
+  PickedFile validfront;
+  PickedFile validback;
+  final ImagePicker _picker = ImagePicker();
   getAvatar() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    final PickedFile image = await _picker.getImage(source: ImageSource.camera);
     setState(() {
       this.avatar = image;
     });
   }
 
   getValidFront() async{
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var image = await _picker.getImage(source: ImageSource.gallery);
     setState(() {
       this.validfront = image;
     });
   }
 
   getValidBack() async{
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    var image = await _picker.getImage(source: ImageSource.gallery);
     setState(() {
       this.validback = image;
     });
@@ -72,12 +72,9 @@ class _RegCredentsView extends State<RegCredentsView>{
               'profile_lname': user['lastname'].toString(),
               'profile_gender': user['gender'].toString(),
               'profile_civil_status': user['civStats'].toString(),
-              'profile_bdate': user['bdate'].toString(),
-              'profile_avatr': this.avatar,
-              'user_valid_id_front': this.validfront,
-              'user_valid_id_back': this.validback
+              'profile_bdate': user['bdate'].toString()
             };
-            Query().registerUser(context, list);
+            Query().registerUser(context, list, this.avatar, this.validfront, this.validback);
           }
         },
         child: Text("Register",
@@ -119,40 +116,70 @@ class _RegCredentsView extends State<RegCredentsView>{
       )).toList()
     );
 
-    final valididfront = GestureDetector(
+    final valididfront = Row(
+      children: <Widget>[
+        Text("Valid ID Front"),
+        GestureDetector(
               onTap: () => getValidFront(),
               child:SizedBox(
                 height: 155.0,
                 width: 250.0,
-                child: Image.asset(
+                child: this.validfront == null ? 
+                Image.asset(
                   "assets/app/front.jpg",
                   fit: BoxFit.contain,
-                ),
+                )
+                :
+                Image.asset(this.validfront.path,
+                  fit: BoxFit.contain,
+                  ),
               )
-            );
-    final valididback = GestureDetector(
+            )
+      ],
+    );
+    final valididback = Row(
+      children: <Widget>[
+        Text("Valid ID Back"),
+        GestureDetector(
               onTap: () => getValidBack(),
               child:SizedBox(
                 height: 155.0,
                 width: 250.0,
-                child: Image.asset(
+                child: this.validback == null ?
+                Image.asset(
                   "assets/app/back.jpg",
                   fit: BoxFit.contain,
-                ),
+                )
+                :
+                Image.asset(this.validback.path,
+                  fit: BoxFit.contain,
+                  ),
               )
-            );
+            )
+      ]
+    );
 
-    final avatar = GestureDetector(
-              onTap: () => this.avatar = getAvatar(),
+    final avatar = Row(
+      children: <Widget>[
+        Text("Valid ID Front"),
+        GestureDetector(
+              onTap: () => getAvatar(),
               child:SizedBox(
                 height: 155.0,
                 width: 250.0,
-                child: Image.asset(
+                child: this.avatar == null ? 
+                Image.asset(
                   "assets/users/default-profile.jpg",
                   fit: BoxFit.contain,
-                ),
+                )
+                :
+                Image.asset(this.avatar.path,
+                  fit: BoxFit.contain,
+                  ),
               )
-            );
+            )
+      ]
+    );
 
     return Stack(
         children: <Widget>[

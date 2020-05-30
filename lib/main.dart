@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:english_words/english_words.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import 'login.dart';
-import 'dashboard.dart';
-import 'requests.dart';
-import 'user_profile.dart';
+ import 'login.dart';
+ import 'dashboard.dart';
+ import 'requests.dart';
+ import 'user_profile.dart';
+import 'map.dart';
 
 void main() => runApp(MyApp());
 
@@ -27,7 +28,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginView()
+      // home: LoginView()
+      home: MyHomePage(id: 11, type: 1)
     );
   }
 }
@@ -62,17 +64,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _MyHomePageState({this.id, this.type});
 
-  Future<UserDetails> userDetails;
-  Future<List<JobCategory>> categories;
-
-  void initState(){
-    super.initState();
-    if(id != null){
-      userDetails = Query().fetchUser(id);
-    }
-    categories = Query().fetchJobCategory();
-  }
-
   _onItemTapped(int index){
     setState((){
       _selectedIndex = index;
@@ -106,7 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.symmetric(horizontal:16.0, vertical: 10.0),
                 child: Row(
                         children: <Widget>[FlatButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context)  =>  new GoogleMaps(lat: 8.48481, long: 124.65859)),
+                              );
+                            },
                             child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
@@ -124,18 +120,18 @@ class _MyHomePageState extends State<MyHomePage> {
       );
   }
 
-  _changeScreen(BuildContext content, int index, int type) {
+  _changeScreen(BuildContext content, int index, int type, int id) {
     if(type == 2){
       switch (index) {
         case 0:
           {
-            return Dashboard(jobCategory: categories);
+            return Dashboard(jobCategory: Query().fetchJobCategory(), userID: id);
           }
         case 1:
           {
             return Scaffold(
                 appBar: AppBar(
-                  title: Text("Category List"),
+                  title: Text("Your Request"),
                 ),
                 body: ListView.builder(
                 padding: const EdgeInsets.all(16.0),
@@ -160,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
           {
             return Scaffold(
                 appBar: AppBar(
-                  title: Text("Category List"),
+                  title: Text("Client Request"),
                 ),
                 body: ListView.builder(
                 padding: const EdgeInsets.all(16.0),
@@ -182,14 +178,14 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         case 3:
         {
-            return UserProfilePage(user: userDetails);
+            return UserProfilePage(user_id: id, type: type);
         }
       }
     }else if(type == 1){
       switch (index) {
         case 0:
           {
-            return Dashboard(jobCategory: categories);
+            return Dashboard(jobCategory: Query().fetchJobCategory());
           }
         case 1:
           {
@@ -218,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         case 2:
         {
-            return UserProfilePage(user: userDetails);
+            return UserProfilePage(user_id: id);
         }
       }
     }
@@ -294,7 +290,7 @@ class _MyHomePageState extends State<MyHomePage> {
         WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
-            body: _changeScreen(context, _selectedIndex, type),
+            body: _changeScreen(context, _selectedIndex, type, id),
             bottomNavigationBar: BottomNavigationBar(
               items: userNavigation(type),
               type: BottomNavigationBarType.fixed,
