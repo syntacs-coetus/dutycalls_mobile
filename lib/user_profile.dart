@@ -225,7 +225,7 @@ class _UserProfilePage extends State<UserProfilePage>{
                           actions: <Widget>[
                             new FlatButton(
                                 onPressed: () => Navigator.of(context).pop(),
-                                child: new Text("Send Application"),
+                                child: new Text("Close"),
                               )
                           ],
                         );

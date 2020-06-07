@@ -57,7 +57,7 @@ class ProvList extends StatelessWidget {
         FormBuilderValidators.required(errorText: "Time Required"),
       ],
     );
-  createList(BuildContext context, int index, data, value) {
+  createList(BuildContext context, int index, data) {
     return Card(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -69,13 +69,31 @@ class ProvList extends StatelessWidget {
               ),
               Padding(
                 padding: EdgeInsets.only(left: 60.0, top: 20.0),
-                child:Row(
-                      children: List.generate(5, (index){
-                        return Icon(
-                          index < value ? Icons.star : Icons.star_border,
-                          color: index < value ? Colors.amber : Colors.black,
-                        );
-                      })
+                child:FutureBuilder<ProviderRating>(
+                  future: Query().fetchProviderRating(context, data.providerid),
+                  builder: (context, snap){
+                    if(snap.hasData){
+                      final nData = snap.data;
+                      return Row(
+                        children: List.generate(5, (index){
+                          return Icon(
+                            index < nData.rating ? Icons.star : Icons.star_border,
+                            color: index < nData.rating ? Colors.amber : Colors.black,
+                          );
+                        })
+                      );
+                    }
+                    else{
+                      return Row(
+                        children: List.generate(5, (index){
+                          return Icon(
+                            index < 0 ? Icons.star : Icons.star_border,
+                            color: index < 0 ? Colors.amber : Colors.black,
+                          );
+                        })
+                      );
+                    }
+                  }
                   ),
               ),
               ButtonBar(
@@ -200,7 +218,7 @@ class ProvList extends StatelessWidget {
                 itemCount: data.length,
                 itemBuilder: (context, i){
                   final index = i ~/ 2;
-                  return createList(context, index, data[i], 3);
+                  return createList(context, index, data[i]);
                 }
             );
           } else if (snapshot.hasError) {

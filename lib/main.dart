@@ -321,6 +321,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildUserRequest(BuildContext context, data, uid){
     String status = "Pending";
+    int stars = 0;
     if(data.status != 2)
     {
       status = data.status == 1 ? data.done == 0 ? "Accepted" : "Finished" : "Declined";
@@ -464,9 +465,32 @@ class _MyHomePageState extends State<MyHomePage> {
                           content: Row(
                           children: List.generate(5, (index){
                             return IconButton(
-                              onPressed: () {},
-                              icon: Icon(index < 0 ? Icons.star : Icons.star_border),
-                              color: index < 0 ? Colors.amber : Colors.black,
+                              onPressed: () {
+                                return showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: Text("Are you sure you want to rate "+(index+1).toString()+" stars to "+data.fName, style: theme.textTheme.subtitle2),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            onPressed: (){
+                                              Query().updateStars(context, data.id, data.providerid, index+1);
+                                            },
+                                            child: Text("Proceed")
+                                          ),
+                                          FlatButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text("Cancel")
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                );
+                              },
+                              icon: Icon(index < stars ? Icons.star : Icons.star_border),
+                              color: index < stars ? Colors.amber : Colors.black,
                             );
                           })
                         ),

@@ -11,7 +11,19 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
-const baseURL = 'http://192.168.43.207:8000/api';
+const baseURL = 'http://192.168.1.12:8000/api';
+
+class ProviderRating {
+  final int rating;
+  
+  ProviderRating({this.rating});
+
+  factory ProviderRating.fromJson(Map<String, dynamic> json){
+    return ProviderRating(
+      rating: int.parse(json['rating'])
+    );
+  }
+}
 
 class JobsByProvider{
   final int id;
@@ -85,6 +97,7 @@ class ClientRequest{
 
 class PersonalRequest{
   final int id;
+  final int providerid;
   final String job;
   final String fName;
   final String lName;
@@ -95,12 +108,13 @@ class PersonalRequest{
   final String description;
   final int done;
 
-  PersonalRequest({this.id, this.job, this.fName, this.lName, this.date, this.time, this.budget, this.status, this.description, this.done});
+  PersonalRequest({this.id, this.providerid, this.job, this.fName, this.lName, this.date, this.time, this.budget, this.status, this.description, this.done});
 
   factory PersonalRequest.fromJson(Map<String, dynamic> json) {
     return PersonalRequest(
       id: json['id'],
       job: json['job_title'],
+      providerid: json['profile_id'],
       fName: json['profile_fname'],
       lName: json['profile_lname'],
       date: json['cjr_sched_date'].toString(),
@@ -239,6 +253,45 @@ class Geolocation{
 
 class Query{
 
+  updateStars(BuildContext context, int id, int providerid, int stars) async
+  {
+    final response = await http.post("$baseURL/provider/updatestars", body:{
+      'otj_id': id.toString(),
+      'provider_id': providerid.toString(),
+      'stars': stars.toString()
+    }, headers: {"Accept": "application/json"});
+    print(response.body);
+    if(response.statusCode == 200) {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(response.body, style: ThemeData().textTheme.subtitle2),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Continue")
+                ),
+              ],
+            );
+          }
+      );
+    } else {
+      throw Exception("Failed to update stars");
+    }
+  }
+
+  Future<ProviderRating> fetchProviderRating(BuildContext context, int userID) async {
+    final response = await http.get("$baseURL/provider/fetchrating/"+userID.toString(), headers: {"Accept": "application/json"});
+    if(response.statusCode == 200) {
+      return ProviderRating.fromJson(json.decode(response.body));
+    } else {
+      throw Exception("Failed to load Provider Rating");
+    }
+  }
+
   updateProviderJob(BuildContext context,int userID, int jobid) async {
     final response = await http.post('$baseURL/provider/updatejob', body: {"userID": userID.toString(), "jobID": jobid.toString()}, headers:{"Accept": "application/json"});
     if (response.statusCode == 200) {
@@ -282,7 +335,6 @@ class Query{
 
   Future<List<ProviderJobs>> fetchAllJobs() async {
     final response = await http.get('$baseURL/provider/jobs', headers: {"Accept": "application/json"});
-    print(response.body);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response, then parse the JSON.
       return parseProviderJobs(response.body);
@@ -407,19 +459,21 @@ class Query{
     final Map<String, String> details = 
     {
       'user_id': id.toString(),
-      'user_reason': reason.toString()
+      'user_reason': reason
     };
+    print(details);
     final request = http.MultipartRequest('POST', Uri.parse(url));
     request.fields.addAll(details);
     request.files.add(http.MultipartFile.fromBytes('user_nbi', await nbi.readAsBytes(), filename: nbi.path.split("/").last));
     request.files.add(http.MultipartFile.fromBytes('user_barangay', await barangay.readAsBytes(), filename: barangay.path.split("/").last));
     final response = await request.send();
+    final stream = await response.stream.bytesToString();
     if(response.statusCode == 200){
       return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text("Await for confirmation"),
-          content: const Text("Your application has been sent and is waiting for confirmation.\nThis may take 24 to 48 hours of processing."),
+          content: Text(stream),
           actions: <Widget>[
             FlatButton(
               child: Text("Okay"),
@@ -435,7 +489,7 @@ class Query{
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text("Unprocessed"),
-          content: const Text("Something went wrong while processing your application. Please try again in a minute or ask for suppport."),
+          content: Text(stream),
           actions: <Widget>[
             FlatButton(
               child: Text("Okay"),
