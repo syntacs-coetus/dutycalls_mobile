@@ -5,13 +5,15 @@ import 'package:latlong/latlong.dart';
 class GoogleMaps extends StatelessWidget{
   final double long;
   final double lat;
+  final double provlong;
+  final double provlat;
 
-  GoogleMaps({this.lat, this.long});
+  GoogleMaps({this.provlat, this.provlong, this.lat, this.long});
 
  Widget build(BuildContext context){
    return MaterialApp(
      title: 'Map',
-     home: TheMap(lat: lat, long: long),
+     home: TheMap(provlat: provlat, provlong: provlong, lat: lat, long: long),
    );
  }
 }
@@ -19,21 +21,25 @@ class GoogleMaps extends StatelessWidget{
 class TheMap extends StatefulWidget{
   final double long;
   final double lat;
+  final double provlong;
+  final double provlat;
 
-  TheMap({this.lat, this.long});
+  TheMap({this.provlat, this.provlong, this.lat, this.long});
  @override
- State<TheMap> createState() => TheMapFullState(lat: lat, long: long);
+ State<TheMap> createState() => TheMapFullState(provlat: provlat, provlong: provlong, lat: lat, long: long);
 }
 
 class TheMapFullState extends State<TheMap> {
   final double long;
   final double lat;
-  TheMapFullState({this.lat, this.long});
+  final double provlong;
+  final double provlat;
+  TheMapFullState({this.provlat, this.provlong, this.lat, this.long});
  @override
  Widget build(BuildContext context){
    return new FlutterMap(
      options: new MapOptions(
-       center: new LatLng(8.48435,124.65841),
+       center: new LatLng(provlat, provlong),
        zoom: 18.0,
      ),
      layers: [
@@ -46,7 +52,7 @@ class TheMapFullState extends State<TheMap> {
            new Marker(
              width: 60.0,
              height: 60.0,
-             point: new LatLng(8.48435,124.65841),
+             point: new LatLng(provlat, provlong),
              builder: (ctx) =>
              new Container(
                decoration: BoxDecoration(

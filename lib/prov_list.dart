@@ -18,8 +18,13 @@ class ProvList extends StatelessWidget {
 
     final description = FormBuilderTextField(
       attribute: "description",
-      maxLines: 1,
-      decoration: InputDecoration(labelText: "Description"),
+      maxLines: 5,
+      decoration: const InputDecoration(
+        border: OutlineInputBorder(),
+        hintText: "Write what the Service Provider should do i.e\nClean Bath thub\nScrub Floor\netc.",
+        helperText: "Keep it short and simple",
+        labelText: "Description"
+      ),
       validators: [
         FormBuilderValidators.required(errorText: "Description Required"),
       ],
@@ -45,17 +50,11 @@ class ProvList extends StatelessWidget {
       initialValue: DateTime.now(),
       initialTime: TimeOfDay.now(),
       decoration:
-      InputDecoration(labelText: "Time"),
+      InputDecoration(
+        labelText: "Time"
+        ),
       validators: [
         FormBuilderValidators.required(errorText: "Time Required"),
-      ],
-    );
-    final taskslist = FormBuilderTextField(
-      attribute: "tasks",
-      maxLines: 2,
-      decoration: InputDecoration(labelText: "Tasks"),
-      validators: [
-        FormBuilderValidators.required(errorText: "Tasks Required"),
       ],
     );
   createList(BuildContext context, int index, data, value) {
@@ -109,14 +108,19 @@ class ProvList extends StatelessWidget {
                                                             attribute: "budget",
                                                             maxLines: 1,
                                                             initialValue: (data.fixedrate.toString() != "null") ? data.fixedrate.toString() : "",
-                                                            decoration: InputDecoration(labelText: "Budget"),
+                                                            decoration: InputDecoration(
+                                                              border: OutlineInputBorder(),
+                                                              labelText: "Budget",
+                                                              prefixText: "\₱",
+                                                              suffixText: "PHP",
+                                                              suffixStyle: TextStyle(color: Colors.green)
+                                                            ),
                                                             validators: [
                                                               FormBuilderValidators.required(errorText: "Budget Required"),
                                                             ],
                                                           ),
                                                           datesched,
-                                                          timesched,
-                                                          taskslist
+                                                          timesched
                                                         ]
                                                     )
                                                 ),
@@ -137,11 +141,10 @@ class ProvList extends StatelessWidget {
                                           if(formKey.currentState.saveAndValidate()){
                                             final Map value = formKey.currentState.value;
                                             final Map details = {
-                                              'client_id': userID.toString(),
+                                              'client_id': this.userID.toString(),
                                               'otj_prov_id': data.providerid.toString(),
                                               'cjr_type': jobID.toString(),
                                               'cjr_description': value['description'].toString(),
-                                              'cjr_tasks': value['tasks'].toString(),
                                               'cjr_budget': value['budget'].toString(),
                                               'cjr_sched_date': value['date'].toString(),
                                               'cjr_sched_time': value['time'].toString()
@@ -162,18 +165,6 @@ class ProvList extends StatelessWidget {
           ),
         );
   }
-
-  // __getCurrentPosition(context){
-  //   Future<Position> position = Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  //   return FutureBuilder<Position>(
-  //       future: position,
-  //       builder: (context, AsyncSnapshot<Position> snapshot){
-  //         var data = snapshot.data;
-  //         print(data);
-  //         return;
-  //       }
-  //   );
-  // }
 
   __parseSubtitle(context, String contact, double lat, double long){
     Future<List<Placemark>> placemark = Geolocator().placemarkFromCoordinates(lat, long);
@@ -202,7 +193,6 @@ class ProvList extends StatelessWidget {
       body: FutureBuilder<List<Providers>>(
         future: Query().fetchProvidersList(jobID, userID),
         builder: (context, snapshot){
-          print(snapshot.hasError);
           if(snapshot.hasData){
             List data = snapshot.data;
             return ListView.builder(

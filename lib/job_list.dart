@@ -10,12 +10,12 @@ class JobList extends StatelessWidget {
 
   createGrid(BuildContext context, int index, data){
     return new GestureDetector(
-      onTap: () => (
+      onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context)  =>  new ProvList(jobID: data.id, userID: userID)),
-          )
-      ),
+            MaterialPageRoute(builder: (context)  =>  new ProvList(jobID: data.id, userID: this.userID)),
+          );
+      },
       child:Card(
         color: Colors.lightBlue,
         elevation: 10,

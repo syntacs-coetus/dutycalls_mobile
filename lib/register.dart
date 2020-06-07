@@ -2,10 +2,15 @@ import 'package:duty_calls/reg_credents.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
-class RegisterView extends StatelessWidget {
+class RegisterView extends StatefulWidget {
+  _RegisterView createState() => _RegisterView();
+}
+
+class _RegisterView extends State<RegisterView>{
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final TextEditingController passController = new TextEditingController();
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
+  bool _showPassword = false;
 
   Widget build(BuildContext context){
     final firstname = FormBuilderTextField(
@@ -47,9 +52,20 @@ class RegisterView extends StatelessWidget {
     final passwordField = FormBuilderTextField(
       controller: passController,
       maxLines: 1,
-      obscureText: true,
+      obscureText: !_showPassword,
       attribute: "password",
-      decoration: InputDecoration(labelText: "Password"),
+      decoration: InputDecoration(
+        labelText: "Password",
+        suffixIcon: IconButton(
+          icon: Icon(
+            Icons.remove_red_eye,
+            color: _showPassword ? Colors.blue : Colors.grey,
+          ),
+          onPressed: () {
+            setState(() => _showPassword = !_showPassword);
+          },
+        )
+      ),
       validators: [
         FormBuilderValidators.required(errorText: "Password Required"),
         FormBuilderValidators.max(12),

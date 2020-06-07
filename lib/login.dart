@@ -8,9 +8,16 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'register.dart';
 import 'requests.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
+  @override
+  _LoginView createState() => _LoginView();
+} 
+
+
+class _LoginView extends State<LoginView>{
   final TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
+  bool _showPassword = false;
 
   DateTime currentBackPressTime;
   int beforeExit = 0;
@@ -19,7 +26,9 @@ class LoginView extends StatelessWidget {
     final emailField = FormBuilderTextField(
       attribute: "email",
       maxLines: 1,
-      decoration: InputDecoration(labelText: "Email"),
+      decoration: InputDecoration(
+        labelText: "Email",
+      ),
       validators: [
         FormBuilderValidators.required(errorText: "Email Required"),
         FormBuilderValidators.email(errorText: "Invalid Email"),
@@ -27,13 +36,24 @@ class LoginView extends StatelessWidget {
     );
     final passwordField = FormBuilderTextField(
       maxLines: 1,
-      obscureText: true,
+      obscureText: !_showPassword,
       attribute: "password",
-      decoration: InputDecoration(labelText: "Password"),
+      decoration: InputDecoration(
+        labelText: "Password",
+        suffixIcon: IconButton(
+          icon: Icon(
+            Icons.remove_red_eye,
+            color: _showPassword ? Colors.blue : Colors.grey,
+          ),
+          onPressed: () {
+            setState(() => _showPassword = !_showPassword);
+          },
+        )
+      ),
       validators: [
         FormBuilderValidators.required(errorText: "Password Required"),
-        FormBuilderValidators.maxLength(12),
-        FormBuilderValidators.minLength(3),
+        FormBuilderValidators.max(12),
+        FormBuilderValidators.min(3),
       ],
     );
     final loginButon = Material(
@@ -44,15 +64,9 @@ class LoginView extends StatelessWidget {
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () {
-          if(formKey.currentState.saveAndValidate()){
-            // Navigator.pushReplacement(
-            //   context,
-            //   MaterialPageRoute(builder: (context)  =>  MyHomePage(id: 13, type: 2)),
-            // );
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context)  =>  Query().loginUser(context, formKey.currentState.value)),
-            );
+          if(formKey.currentState.saveAndValidate())
+          {
+            Query().loginUser(context, formKey.currentState.value);
           }
         },
         child: Text("Login",

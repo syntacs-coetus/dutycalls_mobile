@@ -8,14 +8,14 @@ class Dashboard extends StatelessWidget {
   final int userID;
   Dashboard({this.jobCategory, this.userID});
 
-  createGrid(BuildContext context, int index, data){
+  createGrid(BuildContext context, int index, data, int id){
     return new GestureDetector(
-        onTap: () => (
+        onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context)  =>  JobList(catID: data.id, userID: userID)),
-            )
-        ),
+              MaterialPageRoute(builder: (context)  =>  JobList(catID: data.id, userID: id)),
+            );
+        },
         child: Container(
           child: Card(
             color: Colors.lightBlue,
@@ -55,7 +55,7 @@ class Dashboard extends StatelessWidget {
                 itemBuilder: (context, i){
 
                   final index = i ~/ 2;
-                  return createGrid(context, index, data[i]);
+                  return createGrid(context, index, data[i], this.userID);
                 },
               );
             } else if (snapshot.hasError) {

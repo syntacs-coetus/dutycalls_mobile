@@ -1,10 +1,39 @@
+import 'package:duty_calls/settings.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'requests.dart';
 
-class UserProfilePage extends StatelessWidget {
+class UserProfilePage extends StatefulWidget {
   final int user_id;
   final int type;
   UserProfilePage({this.user_id, this.type});
+
+  _UserProfilePage createState() => _UserProfilePage(user_id: this.user_id, type: this.type);
+}
+
+class _UserProfilePage extends State<UserProfilePage>{
+  final int user_id;
+  final int type;
+  _UserProfilePage({this.user_id, this.type});
+  PickedFile nbi;
+  PickedFile barangay;
+  String _reason;
+  final _picker = ImagePicker();
+
+  getNBI() async {
+    var image = await _picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      this.nbi = image;
+    });
+  }
+
+  getBarangay() async {
+    var image = await _picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      this.barangay = image;
+    });
+  }
+
   // final String _bio =
   //     "\"Hi, I am a Freelance developer working for hourly basis. If you wants to contact me to build your product leave a message.\"";
 
@@ -174,8 +203,7 @@ class UserProfilePage extends StatelessWidget {
   //   );
   // }
 
-  Widget _switchButton(
-      BuildContext context, int userID, int type, bool hired, bool working) {
+  Widget _switchButton(BuildContext context, int userID, int type, bool hired, bool working, int user_approved) {
     switch (type) {
       case 1:
         {
@@ -184,15 +212,104 @@ class UserProfilePage extends StatelessWidget {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: InkWell(
-                    onTap: () => showDialog(
+                  child: 
+                  (user_approved == 2) ? 
+                  InkWell(
+                    onTap: () {
+                      showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
+				                  title: const Text("Application pending"),
+                          content: const Text("Your application is still being processed. It might take 24 to 48 hours before this process has been finished. Thank you for your patients"),
+                          actions: <Widget>[
+                            new FlatButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: new Text("Send Application"),
+                              )
+                          ],
+                        );
+                      }
+                      );
+                    },
+                    child: Container(
+                      height: 40.0,
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Your Application is still on pending",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    )
+                  )
+                  :
+                  InkWell(
+                    onTap: () => 
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+				                  title: const Text("Becoming a Service Provider"),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                children: <Widget>[
+                                  TextFormField(
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Tell us why we should accept you as a service provider.',
+                                      helperText: 'keep it short and precise.',
+                                      labelText: 'Why should we accept you?',
+                                    ),
+                                    maxLines: 2,
+                                    onSaved: (String value) => 
+                                      this._reason = value
+                                    ,
+                                  ),
+                                  SizedBox(height: 10.0),
+                                  ListTile(title: Text("NBI Clearance")),
+                                  GestureDetector(
+                                    onTap: () => getNBI(),
+                                    child: this.nbi == null ? 
+                                    Image.asset(
+                                      "assets/app/nbi.png",
+                                      scale: 0.5
+                                    )
+                                    :
+                                    Image.asset(
+                                      this.nbi.path,
+                                      scale: 0.5
+                                    ),
+                                  ),
+                                  Divider(),
+                                  ListTile(title: Text("NBI Clearance")),
+                                  GestureDetector(
+                                    onTap: () => getBarangay(),
+                                    child: this.barangay == null ?
+                                    Image.asset(
+                                      "assets/app/bcl.jpg",
+                                      scale: 0.5
+                                    )
+                                    :
+                                    Image.asset(
+                                      this.barangay.path,
+                                      scale: 0.5
+                                    )
+                                  )
+                                ],
+                              ) 
+                            ),
                             actions: <Widget>[
                               new FlatButton(
-                                onPressed: () => {},
-                                child: new Text("Continue"),
+                                onPressed: () =>
+                                  Query().applyForProvider(context, userID, this._reason, this.nbi, this.barangay)
+                                ,
+                                child: new Text("Send Application"),
                               ),
                             ],
                           );
@@ -212,8 +329,8 @@ class UserProfilePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  )
+                )
               ],
             ),
           );
@@ -321,7 +438,12 @@ class UserProfilePage extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: InkWell(
-              onTap: () => {},
+              onTap: () => {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context)  =>  UserSettings(userID: this.user_id, userType: this.type))
+                )
+              },
               child: Container(
                 height: 40.0,
                 decoration: BoxDecoration(
@@ -404,7 +526,7 @@ class UserProfilePage extends StatelessWidget {
                             // _buildGetInTouch(context, snapshot.data.email, snapshot.data.firstname),
                             SizedBox(height: 6.0),
                             _switchButton(context, user_id, snapshot.data.type,
-                                snapshot.data.forhire, false),
+                                snapshot.data.forhire, false, snapshot.data.user_approved),
                             _settingsButton(context),
                             _logoutButton(context)
                           ],

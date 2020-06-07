@@ -11,8 +11,107 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
-const baseURL = 'http://192.168.1.18:8000/api';
+const baseURL = 'http://192.168.43.207:8000/api';
 
+class JobsByProvider{
+  final int id;
+
+  JobsByProvider({this.id});
+
+  factory JobsByProvider.fromJson(Map<String, dynamic> json){
+    return JobsByProvider(
+      id: json['id']
+    );
+  }
+}
+
+class ProviderJobs{
+  final int id;
+  final String title;
+  final String description;
+
+  ProviderJobs({this.id, this.title, this.description});
+
+  factory ProviderJobs.fromJson(Map<String, dynamic> json){
+    return ProviderJobs(
+      id: json['id'],
+      title: json['job_title'],
+      description: json['job_description']
+    );
+  }
+}
+
+class ClientRequest{
+  final int id;
+  final String job;
+  final String fName;
+  final String lName;
+  final String date;
+  final String time;
+  final String budget;
+  final int status;
+  final String description;
+  final double longitude;
+  final double latitude;
+  final double provlat;
+  final double provlong;
+  final String starttime;
+  final int done;
+  final int rating;
+
+  ClientRequest({this.id, this.job, this.fName, this.lName, this.date, this.time, this.budget, this.status, this.description, this.latitude, this.longitude, this.provlat, this.provlong, this.starttime, this.done, this.rating});
+
+  factory ClientRequest.fromJson(Map<String, dynamic> json){
+    return ClientRequest(
+      id: json['id'],
+      job: json['job_title'],
+      fName: json['profile_fname'],
+      lName: json['profile_lname'],
+      date: json['cjr_sched_date'].toString(),
+      time: json['cjr_sched_time'].toString(),
+      budget: json['cjr_budget'].toString(),
+      status: json['otj_prov_accepts'],
+      description: json['cjr_description'],
+      latitude: json['cjr_latitude'],
+      longitude: json['cjr_longitude'],
+      provlat: json['prov_lat'],
+      provlong: json['prov_long'],
+      starttime: json['otj_starttime'],
+      done: json['otj_done'],
+      rating: json['otj_prov_output_rating']
+    );
+  }
+}
+
+class PersonalRequest{
+  final int id;
+  final String job;
+  final String fName;
+  final String lName;
+  final String date;
+  final String time;
+  final String budget;
+  final int status;
+  final String description;
+  final int done;
+
+  PersonalRequest({this.id, this.job, this.fName, this.lName, this.date, this.time, this.budget, this.status, this.description, this.done});
+
+  factory PersonalRequest.fromJson(Map<String, dynamic> json) {
+    return PersonalRequest(
+      id: json['id'],
+      job: json['job_title'],
+      fName: json['profile_fname'],
+      lName: json['profile_lname'],
+      date: json['cjr_sched_date'].toString(),
+      time: json['cjr_sched_time'].toString(),
+      budget: json['cjr_budget'].toString(),
+      status: json['otj_prov_accepts'],
+      description: json['cjr_description'],
+      done: json['otj_done']
+    );
+  }
+}
 
 class ListedJobs{
   final int id;
@@ -57,6 +156,7 @@ class UserDetails{
   final int civilstatus;
   final String avatar;
   final bool forhire;
+  final int user_approved;
 
   final dateformat = new DateFormat('F-dd-yyyy');
 
@@ -70,6 +170,7 @@ class UserDetails{
     this.type,
     this.civilstatus,
     this.avatar,
+    this.user_approved,
     this.forhire
   });
 
@@ -84,7 +185,8 @@ class UserDetails{
       type: json['user_type'],
       civilstatus: json['profile_civil_status'],
       avatar: json['profile_avatar'],
-      forhire: (json['prov_for_hire'] == 1) ? true : false
+      forhire: (json['prov_for_hire'] == 1) ? true : false,
+      user_approved: json['user_approved']
     );
   }
 }
@@ -137,14 +239,229 @@ class Geolocation{
 
 class Query{
 
+  updateProviderJob(BuildContext context,int userID, int jobid) async {
+    final response = await http.post('$baseURL/provider/updatejob', body: {"userID": userID.toString(), "jobID": jobid.toString()}, headers:{"Accept": "application/json"});
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response, then parse the JSON.
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(response.body, style: ThemeData().textTheme.bodyText2),
+            actions: <Widget>[
+                FlatButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                        Navigator.of(context).pop();
+                    },
+                )
+            ],
+          );
+        });
+    } else {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception('Failed to load Job List');
+    }
+  }
+
+  Future<JobsByProvider> fetchProviderJob(int userID, int jobid) async {
+    final response = await http.get('$baseURL/provider/job/$userID/$jobid', headers:{"Accept": "application/json"});
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response, then parse the JSON.
+      return JobsByProvider.fromJson(json.decode(response.body));
+    } else {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception('Failed to load Job List');
+    }
+  }
+
+  List<ProviderJobs> parseProviderJobs(String responsebody){
+    final parsed = json.decode(responsebody).cast<Map<String, dynamic>>();
+    return parsed.map<ProviderJobs>((json) => ProviderJobs.fromJson(json)).toList();
+  }
+
+  Future<List<ProviderJobs>> fetchAllJobs() async {
+    final response = await http.get('$baseURL/provider/jobs', headers: {"Accept": "application/json"});
+    print(response.body);
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response, then parse the JSON.
+      return parseProviderJobs(response.body);
+    } else {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception('Failed to load Job List');
+    }
+  }
+
+  finishRequest(BuildContext context, int user_id, int id, String code) async {
+    final url = "$baseURL/onthejob/stoprequest";
+    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': user_id.toString(), 'code': code},  headers: {"Accept": "application/json"});
+    if(response.statusCode == 200)
+    {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(response.body, style: ThemeData().textTheme.bodyText2),
+            actions: <Widget>[
+                FlatButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                        Navigator.of(context).pop();
+                    },
+                )
+            ],
+          );
+        });
+    }
+  }
+
+  startRequest(BuildContext context, int user_id, int id) async {
+    final url = "$baseURL/onthejob/startrequest";
+    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': user_id.toString()},  headers: {"Accept": "application/json"});
+    if(response.statusCode == 200)
+    {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(response.body, style: ThemeData().textTheme.bodyText2),
+            actions: <Widget>[
+                FlatButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                        Navigator.of(context).pop();
+                    },
+                )
+            ],
+          );
+        });
+    }
+  }
+
+  changeRequestStatus(BuildContext context, int id, int user_id, int status) async{
+    final url = "$baseURL/onthejob/requeststatus";
+    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': user_id.toString(), 'status': status.toString()}, headers: {"Accept": "application/json"});
+    if(response.statusCode == 200)
+    {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(response.body, style: ThemeData().textTheme.bodyText2),
+            actions: <Widget>[
+                FlatButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                        Navigator.of(context).pop();
+                    },
+                )
+            ],
+          );
+        });
+    }
+    else 
+    {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception(response.body);
+    }
+  }
+  
+  List<ClientRequest> parseClientRequest(String responsebody){
+    final parsed = json.decode(responsebody).cast<Map<String, dynamic>>();
+    return parsed.map<ClientRequest>((json) => ClientRequest.fromJson(json)).toList();
+  }
+
+
+  Future<List<ClientRequest>> fetchClientRequest(int userid) async {
+    final response = await http.get('$baseURL/provider/request/$userid', headers:{"Accept": "application/json"});
+    print(response.body);
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response, then parse the JSON.
+      return parseClientRequest(response.body);
+    } else {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception('Failed to load Job List');
+    }
+  }
+
+  List<PersonalRequest> parsePersonalRequest(String responsebody){
+    final parsed = json.decode(responsebody).cast<Map<String, dynamic>>();
+    return parsed.map<PersonalRequest>((json) => PersonalRequest.fromJson(json)).toList();
+  }
+
+
+  Future<List<PersonalRequest>> fetchPersonalRequest(int userid) async {
+    final response = await http.get('$baseURL/client/requests/$userid', headers:{"Accept": "application/json"});
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response, then parse the JSON.
+      return parsePersonalRequest(response.body);
+    } else {
+      // If the server did not return a 200 OK response, then throw an exception.
+      throw Exception('Failed to load Job List');
+    }
+  }
+
+  applyForProvider(BuildContext context, int id, String reason, PickedFile nbi, PickedFile barangay) async
+  {
+    const url = '$baseURL/accounts/user/apply';
+    final Map<String, String> details = 
+    {
+      'user_id': id.toString(),
+      'user_reason': reason.toString()
+    };
+    final request = http.MultipartRequest('POST', Uri.parse(url));
+    request.fields.addAll(details);
+    request.files.add(http.MultipartFile.fromBytes('user_nbi', await nbi.readAsBytes(), filename: nbi.path.split("/").last));
+    request.files.add(http.MultipartFile.fromBytes('user_barangay', await barangay.readAsBytes(), filename: barangay.path.split("/").last));
+    final response = await request.send();
+    if(response.statusCode == 200){
+      return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Await for confirmation"),
+          content: const Text("Your application has been sent and is waiting for confirmation.\nThis may take 24 to 48 hours of processing."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Okay"),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          ],
+        )
+      );
+    }
+    else
+    {
+      return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text("Unprocessed"),
+          content: const Text("Something went wrong while processing your application. Please try again in a minute or ask for suppport."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Okay"),
+              onPressed: () => Navigator.pop(context, 'Okay'),
+            )
+          ],
+        )
+      );
+    }
+  }
+
   hireProvider(BuildContext context, Map details) async {
     const url = '$baseURL/accounts/user/hire';
     Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    details.addAll({
+    final Map<String, String> body = {
+      'client_id': details['client_id'].toString(),
+      'otj_prov_id': details['otj_prov_id'].toString(),
+      'cjr_type': details['cjr_type'].toString(),
+      'cjr_description': details['cjr_description'].toString(),
+      'cjr_budget': details['cjr_budget'].toString(),
+      'cjr_sched_date': details['cjr_sched_date'].toString(),
+      'cjr_sched_time': details['cjr_sched_time'].toString(),
       'cjr_latitude': position.latitude.toString(),
       'cjr_longitude': position.longitude.toString()
-    });
-    final response = await http.post(Uri.encodeFull(url), body: details, headers: {
+    };
+    final response = await http.post(Uri.encodeFull(url), body: body, headers: {
       'Accept': 'application/json'
     });
     if(response.statusCode == 200){
@@ -213,10 +530,15 @@ class Query{
 
 
   loginUser(BuildContext context, Map user) async {
-    final response = await http.post('$baseURL/accounts/user/login', body: user, headers:{"Accept": "application/json"});
+	  final url = '$baseURL/accounts/user/login';
+	final Map<String, String> body = 
+	  {
+		  'user_email': user['email'].toString(),
+		  'user_password': user['password'].toString()
+	  };
+    final response = await http.post(Uri.encodeFull(url), body: body, headers:{"Accept": "application/json"});
     if(response.statusCode == 200){
       Map data = jsonDecode(response.body);
-      print(data);
       if(data['success'] == false){
         switch(data['type']){
           case 1:{
@@ -265,7 +587,7 @@ class Query{
               builder: (BuildContext context){
                 return AlertDialog(
                   content: SingleChildScrollView(
-                    child: new Text("Your account is still being reviewed, please for 2 to 3 working days for admins to verify your account."),
+                    child: new Text("Your account is still being reviewed, please wait for 2 to 3 working days for admins to verify your account."),
                   ),
                   actions: <Widget>[
                     new FlatButton(
@@ -279,6 +601,27 @@ class Query{
               }
             );
           }
+		  case 4:
+		  {
+            return showDialog(
+              context: context,
+              builder: (BuildContext context){
+                return AlertDialog(
+                  content: SingleChildScrollView(
+                    child: new Text("Email does not exists.\nPlease try typing your email again.", maxLines: 2),
+                  ),
+                  actions: <Widget>[
+                    new FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      }, 
+                      child: new Text("Continue"),
+                    ),
+                  ],
+                );
+              }
+            );
+		  }
         }
       }else{
         Navigator.pushReplacement(
@@ -293,7 +636,7 @@ class Query{
     const url = '$baseURL/accounts/user/store';
     final Map<String, String> body = {
       "user_email": user['user_email'].toString(),
-      "user_password": user['user_passwrd'].toString(),
+      "user_password": user['user_password'].toString(),
       'profile_fname': user['profile_fname'].toString(),
       'profile_mname': user['profile_mname'].toString(),
       'profile_lname': user['profile_lname'].toString(),
@@ -307,7 +650,6 @@ class Query{
     request.files.add(http.MultipartFile.fromBytes('user_id_valid_front', await vf.readAsBytes(), filename: vf.path.split("/").last));
     request.files.add(http.MultipartFile.fromBytes('user_id_valid_back', await vb.readAsBytes(), filename: vb.path.split("/").last));
     final response = await request.send();
-    response.stream.bytesToString().then((value) => print(value));
     if(response.statusCode == 200){
         return showDialog(
           context: context,
