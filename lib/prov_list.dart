@@ -9,10 +9,11 @@ import 'requests.dart';
 
 class ProvList extends StatelessWidget {
 
+  final String jobTitle;
   final int jobID;
   final int userID;
 
-  ProvList({this.jobID, this.userID});
+  ProvList({this.jobTitle, this.jobID, this.userID});
 
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
 
@@ -206,7 +207,8 @@ class ProvList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Provider List"),
+        title: Text(this.jobTitle),
+        backgroundColor: Colors.blue[900],
       ),
       body: FutureBuilder<List<Providers>>(
         future: Query().fetchProvidersList(jobID, userID),
@@ -221,11 +223,8 @@ class ProvList extends StatelessWidget {
                   return createList(context, index, data[i]);
                 }
             );
-          } else if (snapshot.hasError) {
-            return Center(child: CircularProgressIndicator());
-          }else{
-            return Center(child: Text("Job Category empty. Contact an Administrator."));
           }
+          return Center(child: CircularProgressIndicator());
         }
       )
     );

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:intl/intl.dart';
@@ -62,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final int id;
   final int type;
   bool _showPassword = false;
+  final TextEditingController _reason = TextEditingController();
   
   final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
 
@@ -162,6 +162,43 @@ class _MyHomePageState extends State<MyHomePage> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
                               FlatButton(
+                                child: Text("Report"),
+                                textColor: Colors.red,
+                                onPressed: () {
+                                  return  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: TextFormField(
+                                          controller: this._reason,
+                                          decoration: const InputDecoration(
+                                            border: OutlineInputBorder(),
+                                            hintText: 'Tell us why we should accept you as a service provider.',
+                                            helperText: 'keep it short and precise.',
+                                            labelText: 'Why should we accept you?',
+                                          ),
+                                          maxLines: 2
+                                        ),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text("Report"),
+                                            textColor: Colors.red,
+                                            onPressed: () {
+                                            }
+                                          ),
+                                          FlatButton(
+                                            child: Text("Cancel"),
+                                            textColor: Colors.blue,
+                                            onPressed: () {
+                                            }
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  );
+                                }
+                              ),
+                              FlatButton(
                                 child: Text("View"),
                                 onPressed: () {
                                   Navigator.push(
@@ -247,6 +284,45 @@ class _MyHomePageState extends State<MyHomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
+                              FlatButton(
+                                child: Text("Report"),
+                                textColor: Colors.red,
+                                onPressed: () {
+                                  return  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        content: TextFormField(
+                                          controller: this._reason,
+                                          decoration: const InputDecoration(
+                                            border: OutlineInputBorder(),
+                                            hintText: 'Tell us the reason for reporting this person',
+                                            helperText: 'keep it short and precise.',
+                                            labelText: 'What did this person do?',
+                                          ),
+                                          maxLines: 2
+                                        ),
+                                        actions: <Widget>[
+                                          FlatButton(
+                                            child: Text("Report"),
+                                            textColor: Colors.red,
+                                            onPressed: () {
+                                              Query().sendReport(context, uid, data.id, this._reason.text);
+                                            }
+                                          ),
+                                          FlatButton(
+                                            child: Text("Cancel"),
+                                            textColor: Colors.blue,
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            }
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  );
+                                }
+                              ),
                           (data.starttime == null) ?
                             new FlatButton(
                               child: Text("Start"),
@@ -324,7 +400,7 @@ class _MyHomePageState extends State<MyHomePage> {
     int stars = 0;
     if(data.status != 2)
     {
-      status = data.status == 1 ? data.done == 0 ? "Accepted" : "Finished" : "Declined";
+      status = data.status == 1 ? data.done == 0 ? "Accepted" : "Finished | Code: "+data.code : "Declined";
     }
     
     final description = FormBuilderTextField(
@@ -576,6 +652,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return Scaffold(
                 appBar: AppBar(
                   title: Text("Your Request"),
+                  backgroundColor: Colors.blue[900],
                 ),
                 body: FutureBuilder<List<PersonalRequest>>(
                   future: Query().fetchPersonalRequest(uid),
@@ -589,9 +666,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             return _buildUserRequest(context, data[i], uid);
                           }
                       );
-                    }else{
-                      return Center(child: Text("Job Category empty. Contact an Administrator."));
                     }
+                    return Center(child: CircularProgressIndicator());
                 }
               )
             );
@@ -601,6 +677,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return Scaffold(
                 appBar: AppBar(
                   title: Text("Client Request"),
+                  backgroundColor: Colors.blue[900],
                 ),
                 body: FutureBuilder<List<ClientRequest>>(
                   future: Query().fetchClientRequest(uid),
@@ -614,16 +691,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             return _buildProviderRequest(context, data[i], uid);
                           }
                       );
-                    }else{
-                      return Center(child: Text("Job Category empty. Contact an Administrator."));
                     }
+                    return Center(child: CircularProgressIndicator());
                 }
               )
             );
           }
         case 3:
         {
-            return UserProfilePage(user_id: uid, type: type);
+            return UserProfilePage(userid: uid, type: type);
         }
       }
     }else if(type == 1){
@@ -637,6 +713,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return Scaffold(
                 appBar: AppBar(
                   title: Text("Your Request"),
+                  backgroundColor: Colors.blue[900],
                 ),
                 body: FutureBuilder<List<PersonalRequest>>(
                   future: Query().fetchPersonalRequest(uid),
@@ -650,16 +727,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             return _buildUserRequest(context, data[i], uid);
                           }
                       );
-                    }else{
-                      return Center(child: Text("Job Category empty. Contact an Administrator."));
                     }
+                    return Center(child: CircularProgressIndicator());
                 }
               )
             );
           }
         case 2:
         {
-            return UserProfilePage(user_id: uid);
+            return UserProfilePage(userid: uid);
         }
       }
     }
@@ -671,7 +747,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            title: Text('Dashboard'),
+            title: Text('Dashboard', style: TextStyle(color: Colors.white54)),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.table_chart),
@@ -726,10 +802,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Scaffold(
             body: _changeScreen(context, _selectedIndex, type, userID),
             bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Colors.blue[900],
               items: userNavigation(type),
               type: BottomNavigationBarType.fixed,
               currentIndex: _selectedIndex,
-              selectedItemColor: Colors.blue[800],
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white54,
               onTap: _onItemTapped,
             ),
           ),

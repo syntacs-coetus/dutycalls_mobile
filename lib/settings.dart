@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'requests.dart';
@@ -21,12 +19,12 @@ class _UserSettings extends State<UserSettings> {
   String newDate;
   Map<int, bool> checked = new Map<int, bool>();
 
-  GetFirstDate(){
+  getFirstDate(){
     var date = DateTime.now();
     return new DateTime(date.year - 50, date.month, date.day);
   }
 
-  GetLastDate(){
+  getLastDate(){
     var date = DateTime.now();
     return new DateTime(date.year - 18, date.month, date.day);
   }

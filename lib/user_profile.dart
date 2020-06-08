@@ -4,20 +4,20 @@ import 'package:image_picker/image_picker.dart';
 import 'requests.dart';
 
 class UserProfilePage extends StatefulWidget {
-  final int user_id;
+  final int userid;
   final int type;
-  UserProfilePage({this.user_id, this.type});
+  UserProfilePage({this.userid, this.type});
 
-  _UserProfilePage createState() => _UserProfilePage(user_id: this.user_id, type: this.type);
+  _UserProfilePage createState() => _UserProfilePage(userid: this.userid, type: this.type);
 }
 
 class _UserProfilePage extends State<UserProfilePage>{
-  final int user_id;
+  final int userid;
   final int type;
-  _UserProfilePage({this.user_id, this.type});
+  _UserProfilePage({this.userid, this.type});
   PickedFile nbi;
   PickedFile barangay;
-  String _reason;
+  final TextEditingController _reason = TextEditingController();
   final _picker = ImagePicker();
 
   getNBI() async {
@@ -102,13 +102,13 @@ class _UserProfilePage extends State<UserProfilePage>{
   Widget _buildStatItem(String label, int count) {
     TextStyle _statLabelTextStyle = TextStyle(
       fontFamily: 'Roboto',
-      color: Colors.blue,
+      color: Colors.white,
       fontSize: 16.0,
       fontWeight: FontWeight.w200,
     );
 
     TextStyle _statCountTextStyle = TextStyle(
-      color: Colors.blue,
+      color: Colors.white,
       fontSize: 24.0,
       fontWeight: FontWeight.bold,
     );
@@ -128,13 +128,12 @@ class _UserProfilePage extends State<UserProfilePage>{
     );
   }
 
-  Widget _buildStatContainer(int type) {
+  Widget _buildStatContainer(int userID, int type) {
     if (type == 1) {
       return Container(
         height: 60.0,
         margin: EdgeInsets.only(top: 8.0),
         decoration: BoxDecoration(
-          color: Colors.amber,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -148,14 +147,38 @@ class _UserProfilePage extends State<UserProfilePage>{
         height: 60.0,
         margin: EdgeInsets.only(top: 8.0),
         decoration: BoxDecoration(
-          color: Colors.amber,
+          color: Colors.blue[900],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            _buildStatItem("Job Requested", 100),
-            _buildStatItem("Client Ratings", 5),
-            _buildStatItem("Time Ratings", 5),
+            FutureBuilder<JobRequested>(
+              future: Query().fetchJobsRequested(context, userID),
+              builder: (context, snap){
+                if(snap.hasData){
+                  return _buildStatItem("Job Requested", snap.data.jobsrequested);
+                }
+                return Center(child: CircularProgressIndicator());
+              }
+            ),
+            FutureBuilder<JobsCompleted>(
+              future: Query().fetchJobsCompleted(context, userID),
+              builder: (context, snap){
+                if(snap.hasData){
+                  return _buildStatItem("Job Completed", snap.data.jobscompleted);
+                }
+                return Center(child: CircularProgressIndicator());
+              }
+            ),
+            FutureBuilder<ProviderRating>(
+              future: Query().fetchProviderRating(context, userID),
+              builder: (context, snap){
+                if(snap.hasData){
+                  return _buildStatItem("Total Ratings", snap.data.rating);
+                }
+                return Center(child: CircularProgressIndicator());
+              }
+            )
           ],
         ),
       );
@@ -203,7 +226,7 @@ class _UserProfilePage extends State<UserProfilePage>{
   //   );
   // }
 
-  Widget _switchButton(BuildContext context, int userID, int type, bool hired, bool working, int user_approved) {
+  Widget _switchButton(BuildContext context, int userID, int type, bool hired, bool working, int userapproved) {
     switch (type) {
       case 1:
         {
@@ -213,7 +236,7 @@ class _UserProfilePage extends State<UserProfilePage>{
               children: <Widget>[
                 Expanded(
                   child: 
-                  (user_approved == 2) ? 
+                  (userapproved == 2) ? 
                   InkWell(
                     onTap: () {
                       showDialog(
@@ -260,16 +283,14 @@ class _UserProfilePage extends State<UserProfilePage>{
                               child: Column(
                                 children: <Widget>[
                                   TextFormField(
+                                    controller: this._reason,
                                     decoration: const InputDecoration(
                                       border: OutlineInputBorder(),
                                       hintText: 'Tell us why we should accept you as a service provider.',
                                       helperText: 'keep it short and precise.',
                                       labelText: 'Why should we accept you?',
                                     ),
-                                    maxLines: 2,
-                                    onSaved: (String value) => 
-                                      this._reason = value
-                                    ,
+                                    maxLines: 2
                                   ),
                                   SizedBox(height: 10.0),
                                   ListTile(title: Text("NBI Clearance")),
@@ -307,7 +328,7 @@ class _UserProfilePage extends State<UserProfilePage>{
                             actions: <Widget>[
                               new FlatButton(
                                 onPressed: () =>
-                                  Query().applyForProvider(context, userID, this._reason, this.nbi, this.barangay)
+                                  Query().applyForProvider(context, userID, this._reason.text, this.nbi, this.barangay)
                                 ,
                                 child: new Text("Send Application"),
                               ),
@@ -354,7 +375,7 @@ class _UserProfilePage extends State<UserProfilePage>{
                           ),
                           child: Center(
                             child: Text(
-                              "Resign",
+                              "Go Inactive",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w600,
@@ -383,7 +404,7 @@ class _UserProfilePage extends State<UserProfilePage>{
                           ),
                           child: Center(
                             child: Text(
-                              "For Hire",
+                              "Active",
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600,
@@ -438,11 +459,11 @@ class _UserProfilePage extends State<UserProfilePage>{
         children: <Widget>[
           Expanded(
             child: InkWell(
-              onTap: () => {
+              onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context)  =>  UserSettings(userID: this.user_id, userType: this.type))
-                )
+                  MaterialPageRoute(builder: (context)  =>  UserSettings(userID: this.userid, userType: this.type))
+                );
               },
               child: Container(
                 height: 40.0,
@@ -501,7 +522,7 @@ class _UserProfilePage extends State<UserProfilePage>{
     Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
         body: FutureBuilder<UserDetails>(
-            future: Query().fetchUser(user_id),
+            future: Query().fetchUser(userid),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Stack(
@@ -519,14 +540,14 @@ class _UserProfilePage extends State<UserProfilePage>{
                                 ". " +
                                 snapshot.data.lastname),
                             _buildStatus(context, snapshot.data.type),
-                            _buildStatContainer(snapshot.data.type),
+                            _buildStatContainer(userid, snapshot.data.type),
                             // _buildBio(context),
                             _buildSeparator(screenSize),
                             SizedBox(height: 10.0),
                             // _buildGetInTouch(context, snapshot.data.email, snapshot.data.firstname),
                             SizedBox(height: 6.0),
-                            _switchButton(context, user_id, snapshot.data.type,
-                                snapshot.data.forhire, false, snapshot.data.user_approved),
+                            _switchButton(context, userid, snapshot.data.type,
+                                snapshot.data.forhire, false, snapshot.data.userapproved),
                             _settingsButton(context),
                             _logoutButton(context)
                           ],
@@ -538,7 +559,7 @@ class _UserProfilePage extends State<UserProfilePage>{
               } else if (snapshot.hasError) {
                 return Center(child: Text("${snapshot.error}"));
               }
-              return CircularProgressIndicator();
+              return Center(child: CircularProgressIndicator());
             }));
   }
 }

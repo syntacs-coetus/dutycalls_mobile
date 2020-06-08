@@ -3,21 +3,22 @@ import 'prov_list.dart';
 import 'requests.dart';
 
 class JobList extends StatelessWidget {
+  final String catTitle;
   final int catID;
   final int userID;
 
-  JobList({this.catID, this.userID});
+  JobList({this.catTitle, this.catID, this.userID});
 
   createGrid(BuildContext context, int index, data){
     return new GestureDetector(
       onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context)  =>  new ProvList(jobID: data.id, userID: this.userID)),
+            MaterialPageRoute(builder: (context)  =>  new ProvList(jobTitle: data.jobTitle, jobID: data.id, userID: this.userID)),
           );
       },
       child:Card(
-        color: Colors.lightBlue,
+        color: Colors.blue[900],
         elevation: 10,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -38,7 +39,8 @@ class JobList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Job List"),
+        title: Text(this.catTitle),
+        backgroundColor: Colors.blue[900],
       ),
       body: FutureBuilder<List<ListedJobs>>(
         future: Query().fetchJobList(catID),
@@ -53,11 +55,8 @@ class JobList extends StatelessWidget {
                   return createGrid(context, index, data[i]);
                 }
             );
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Job Category empty. Contact an Administrator."));
-          }else{
-            return Center(child: CircularProgressIndicator());
           }
+          return Center(child: CircularProgressIndicator());
         }
       )
     );

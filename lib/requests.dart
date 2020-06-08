@@ -11,7 +11,31 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 
-const baseURL = 'http://192.168.1.12:8000/api';
+const baseURL = 'http://192.168.43.207:8000/api';
+
+class JobRequested{
+  final jobsrequested;
+  
+  JobRequested({this.jobsrequested});
+
+  factory JobRequested.fromJson(Map<String, dynamic> json){
+    return JobRequested(
+      jobsrequested: json['totalRequest']
+    );
+  }
+}
+
+class JobsCompleted{
+  final jobscompleted;
+  
+  JobsCompleted({this.jobscompleted});
+
+  factory JobsCompleted.fromJson(Map<String, dynamic> json){
+    return JobsCompleted(
+      jobscompleted: json['totalJobs']
+    );
+  }
+}
 
 class ProviderRating {
   final int rating;
@@ -20,7 +44,7 @@ class ProviderRating {
 
   factory ProviderRating.fromJson(Map<String, dynamic> json){
     return ProviderRating(
-      rating: int.parse(json['rating'])
+      rating: json['rating'] == null ? 0 : json['rating']
     );
   }
 }
@@ -90,7 +114,7 @@ class ClientRequest{
       provlong: json['prov_long'],
       starttime: json['otj_starttime'],
       done: json['otj_done'],
-      rating: json['otj_prov_output_rating']
+      rating: json['otj_prov_output_rating'],
     );
   }
 }
@@ -107,8 +131,9 @@ class PersonalRequest{
   final int status;
   final String description;
   final int done;
+  final String code;
 
-  PersonalRequest({this.id, this.providerid, this.job, this.fName, this.lName, this.date, this.time, this.budget, this.status, this.description, this.done});
+  PersonalRequest({this.id, this.providerid, this.job, this.fName, this.lName, this.date, this.time, this.budget, this.status, this.description, this.done, this.code});
 
   factory PersonalRequest.fromJson(Map<String, dynamic> json) {
     return PersonalRequest(
@@ -122,7 +147,8 @@ class PersonalRequest{
       budget: json['cjr_budget'].toString(),
       status: json['otj_prov_accepts'],
       description: json['cjr_description'],
-      done: json['otj_done']
+      done: json['otj_done'],
+      code: json['cjr_code']
     );
   }
 }
@@ -170,7 +196,7 @@ class UserDetails{
   final int civilstatus;
   final String avatar;
   final bool forhire;
-  final int user_approved;
+  final int userapproved;
 
   final dateformat = new DateFormat('F-dd-yyyy');
 
@@ -184,7 +210,7 @@ class UserDetails{
     this.type,
     this.civilstatus,
     this.avatar,
-    this.user_approved,
+    this.userapproved,
     this.forhire
   });
 
@@ -200,7 +226,7 @@ class UserDetails{
       civilstatus: json['profile_civil_status'],
       avatar: json['profile_avatar'],
       forhire: (json['prov_for_hire'] == 1) ? true : false,
-      user_approved: json['user_approved']
+      userapproved: json['user_approved']
     );
   }
 }
@@ -242,16 +268,55 @@ class Geolocation{
     };
     final response = await http.post(Uri.encodeFull(url), body: body, headers: {"Accept": "application/json"});
     if(response.statusCode == 200){
-      Navigator.pushReplacement(context, 
-        new MaterialPageRoute(
-          builder: (BuildContext context) => new MyHomePage(id: userID, type: type)
-        )
+       return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(response.body, style: ThemeData().textTheme.subtitle2),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Continue")
+                ),
+              ],
+            );
+          }
       );
     }
   }
 }
 
 class Query{
+
+  sendReport(BuildContext context, int reporterid, int targetid, String reason) async {
+    final response = await http.post("$baseURL/provider/sendreport", body:{
+      'reported_by': reporterid.toString(),
+      'reported': targetid.toString(),
+      'reason': reason
+    }, headers: {"Accept": "application/json"});
+    if(response.statusCode == 200) {
+      return showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(response.body, style: ThemeData().textTheme.subtitle2),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Continue")
+                ),
+              ],
+            );
+          }
+      );
+    } else {
+      throw Exception("Failed to send report");
+    }
+  }
 
   updateStars(BuildContext context, int id, int providerid, int stars) async
   {
@@ -260,7 +325,6 @@ class Query{
       'provider_id': providerid.toString(),
       'stars': stars.toString()
     }, headers: {"Accept": "application/json"});
-    print(response.body);
     if(response.statusCode == 200) {
       return showDialog(
           context: context,
@@ -280,6 +344,25 @@ class Query{
       );
     } else {
       throw Exception("Failed to update stars");
+    }
+  }
+
+  Future<JobRequested> fetchJobsRequested(BuildContext context, int userID) async {
+    final response = await http.get("$baseURL/request/gettotal/"+userID.toString(), headers: {"Accept": "application/json"});
+    if(response.statusCode == 200) {
+      return JobRequested.fromJson(json.decode(response.body));
+    } else {
+      throw Exception("Failed to load Provider Rating");
+    }
+  }
+
+
+  Future<JobsCompleted> fetchJobsCompleted(BuildContext context, int userID) async {
+    final response = await http.get("$baseURL/provider/jobscompleted/"+userID.toString(), headers: {"Accept": "application/json"});
+    if(response.statusCode == 200) {
+      return JobsCompleted.fromJson(json.decode(response.body));
+    } else {
+      throw Exception("Failed to load Provider Rating");
     }
   }
 
@@ -344,9 +427,9 @@ class Query{
     }
   }
 
-  finishRequest(BuildContext context, int user_id, int id, String code) async {
+  finishRequest(BuildContext context, int userid, int id, String code) async {
     final url = "$baseURL/onthejob/stoprequest";
-    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': user_id.toString(), 'code': code},  headers: {"Accept": "application/json"});
+    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': userid.toString(), 'code': code},  headers: {"Accept": "application/json"});
     if(response.statusCode == 200)
     {
       return showDialog(
@@ -367,9 +450,9 @@ class Query{
     }
   }
 
-  startRequest(BuildContext context, int user_id, int id) async {
+  startRequest(BuildContext context, int userid, int id) async {
     final url = "$baseURL/onthejob/startrequest";
-    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': user_id.toString()},  headers: {"Accept": "application/json"});
+    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': userid.toString()},  headers: {"Accept": "application/json"});
     if(response.statusCode == 200)
     {
       return showDialog(
@@ -390,9 +473,9 @@ class Query{
     }
   }
 
-  changeRequestStatus(BuildContext context, int id, int user_id, int status) async{
+  changeRequestStatus(BuildContext context, int id, int userid, int status) async{
     final url = "$baseURL/onthejob/requeststatus";
-    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': user_id.toString(), 'status': status.toString()}, headers: {"Accept": "application/json"});
+    final response = await http.post(Uri.encodeFull(url), body: {'req_id': id.toString(), 'user_id': userid.toString(), 'status': status.toString()}, headers: {"Accept": "application/json"});
     if(response.statusCode == 200)
     {
       return showDialog(
@@ -461,7 +544,6 @@ class Query{
       'user_id': id.toString(),
       'user_reason': reason
     };
-    print(details);
     final request = http.MultipartRequest('POST', Uri.parse(url));
     request.fields.addAll(details);
     request.files.add(http.MultipartFile.fromBytes('user_nbi', await nbi.readAsBytes(), filename: nbi.path.split("/").last));

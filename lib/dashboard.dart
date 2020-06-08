@@ -8,24 +8,23 @@ class Dashboard extends StatelessWidget {
   final int userID;
   Dashboard({this.jobCategory, this.userID});
 
-  createGrid(BuildContext context, int index, data, int id){
+  createList(BuildContext context, int index, data, int id){
     return new GestureDetector(
         onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context)  =>  JobList(catID: data.id, userID: id)),
+              MaterialPageRoute(builder: (context)  =>  JobList(catTitle: data.catTitle, catID: data.id, userID: id)),
             );
         },
         child: Container(
           child: Card(
-            color: Colors.lightBlue,
-            elevation: 10,
+            color: Colors.blue[900],
+            elevation: 0,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ListTile(
                   title: Text("${data.catTitle}", style: TextStyle(color: Colors.white)),
-                  subtitle: Text("${data.catDesc}", style: TextStyle(color: Colors.white, fontSize: 7.5)),
                 ),
               ],
             ),
@@ -39,6 +38,7 @@ class Dashboard extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Category List"),
+        backgroundColor: Colors.blue[900],
       ),
       body: Center(
         child: FutureBuilder<List<JobCategory>>(
@@ -46,16 +46,13 @@ class Dashboard extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               List data = snapshot.data;
-              return GridView.builder(
+              return ListView.builder(
                 itemCount: data.length,
-                gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                   childAspectRatio: MediaQuery.of(context).size.width / (MediaQuery.of(context).size.height / 4)
-                ),
+                padding: const EdgeInsets.all(16.0),
                 itemBuilder: (context, i){
 
                   final index = i ~/ 2;
-                  return createGrid(context, index, data[i], this.userID);
+                  return createList(context, index, data[i], this.userID);
                 },
               );
             } else if (snapshot.hasError) {

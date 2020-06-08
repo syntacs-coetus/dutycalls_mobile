@@ -1,0 +1,16 @@
+Mobile Design
+- Job List Count Service Provider, Random Colors, Job List should show category title
+- Category List Single Row and Show Job Type Count
+- Provider List show Job Title, Sort by Rating descending Order butngan og profile picture, change Hire to View then showDialog then show details then hire button on bottom(important details), on click Hire open new state
+- Disable Buttons when doing requests
+- Edit Request should have cancel button
+- User Profile Show Values, Job Requested - Job Offered - Total Ratings to Grids
+- Resign/For Hire Dialog to show success | Inactive or Active
+- User Settings | All Credentials, details etc should be shown
+- Appbar to Logo Color
+- Loading Indicators
+
+Web Admin Design
+- reporting: id, user_id, reported_by, reported_datetime, reason, deleted
+- Reports Design: Sidenav Title: Reports | Cards Design: Header Reported, Card Body List of Reporters - Reasons
+- user_accounts table user_active type: 2 - Banned
