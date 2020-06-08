@@ -58,7 +58,7 @@ class _LoginView extends State<LoginView>{
     );
     final loginButon = Material(
       elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
+      borderRadius: BorderRadius.circular(5.0),
       color: Color(0xff01A0C7),
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
@@ -77,7 +77,7 @@ class _LoginView extends State<LoginView>{
     );
     final signupButton = Material(
       elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
+      borderRadius: BorderRadius.circular(5.0),
       color: Colors.red,
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
@@ -92,30 +92,6 @@ class _LoginView extends State<LoginView>{
             textAlign: TextAlign.center,
             style: style.copyWith(
                 color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-    );
-    final googleButton = Material(
-      elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
-      color: Colors.white,
-      child: MaterialButton(
-        minWidth: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        onPressed: () {},
-        child: RichText(
-          text: TextSpan(
-            style: Theme.of(context).textTheme.bodyText1,
-            children: [
-              WidgetSpan(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: Icon(MdiIcons.google),
-                ),
-              ),
-              TextSpan(text: ' Google Sign In'),
-            ],
-          ),
-        )
       ),
     );
     Future<bool> _onWillPop() async {
@@ -143,11 +119,11 @@ class _LoginView extends State<LoginView>{
             child: Container(
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.all(36.0),
+                padding: const EdgeInsets.fromLTRB(36.0, 80.0, 36.0, 36.0),
                 child: ListView(
                   children: <Widget>[
                     SizedBox(
-                      height: 155.0,
+                      height: 200.0,
                       child: Image.asset(
                         "assets/app/logo.png",
                         fit: BoxFit.contain,
@@ -171,10 +147,6 @@ class _LoginView extends State<LoginView>{
                       height: 15.0,
                     ),
                     signupButton,
-                    SizedBox(
-                      height: 15.0,
-                    ),
-                    googleButton,
                     SizedBox(
                       height: 15.0,
                     ),

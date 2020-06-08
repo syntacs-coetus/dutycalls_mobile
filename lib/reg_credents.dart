@@ -56,7 +56,7 @@ class _RegCredentsView extends State<RegCredentsView>{
     );
     final signupButton = Material(
       elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
+      borderRadius: BorderRadius.circular(5.0),
       color: Colors.red,
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,

@@ -83,7 +83,7 @@ class _RegisterView extends State<RegisterView>{
     );
     final loginButon = Material(
       elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
+      borderRadius: BorderRadius.circular(5.0),
       color: Color(0xff01A0C7),
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
@@ -99,7 +99,7 @@ class _RegisterView extends State<RegisterView>{
     );
     final signupButton = Material(
       elevation: 5.0,
-      borderRadius: BorderRadius.circular(30.0),
+      borderRadius: BorderRadius.circular(5.0),
       color: Colors.white,
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
@@ -127,11 +127,11 @@ class _RegisterView extends State<RegisterView>{
               child: Container(
                 color: Colors.white,
                 child: Padding(
-                  padding: const EdgeInsets.all(36.0),
+                padding: const EdgeInsets.fromLTRB(36.0, 80.0, 36.0, 36.0),
                   child: Column(
                     children: <Widget>[
                       SizedBox(
-                        height: 155.0,
+                        height: 150.0,
                         child: Image.asset(
                           "assets/app/logo.png",
                           fit: BoxFit.contain,
