@@ -308,7 +308,7 @@ class _UserProfilePage extends State<UserProfilePage>{
                                     ),
                                   ),
                                   Divider(),
-                                  ListTile(title: Text("NBI Clearance")),
+                                  ListTile(title: Text("Barangay Clearance Clearance")),
                                   GestureDetector(
                                     onTap: () => getBarangay(),
                                     child: this.barangay == null ?
