@@ -184,12 +184,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                             child: Text("Report"),
                                             textColor: Colors.red,
                                             onPressed: () {
+                                              Query().sendReport(context, uid, data.id, this._reason.text);
                                             }
                                           ),
                                           FlatButton(
                                             child: Text("Cancel"),
                                             textColor: Colors.blue,
                                             onPressed: () {
+                                              Navigator.pop(context);
                                             }
                                           ),
                                         ],

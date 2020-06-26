@@ -44,7 +44,7 @@ class ProviderRating {
 
   factory ProviderRating.fromJson(Map<String, dynamic> json){
     return ProviderRating(
-      rating: json['rating'] == null ? 0 : json['rating']
+      rating: (json['rating'] == null && json['rating'] == 0) ? 0 : json['rating']
     );
   }
 }
@@ -509,7 +509,6 @@ class Query{
 
   Future<List<ClientRequest>> fetchClientRequest(int userid) async {
     final response = await http.get('$baseURL/provider/request/$userid', headers:{"Accept": "application/json"});
-    print(response.body);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response, then parse the JSON.
       return parseClientRequest(response.body);
@@ -655,6 +654,7 @@ class Query{
 
   Future<List<Providers>> fetchProvidersList(int id, int userid) async {
     final response = await http.get('$baseURL/jobtype/providers/$id/$userid', headers:{"Accept": "application/json"});
+    // print(response.body);
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response, then parse the JSON.
       return parseProvidersList(response.body);
